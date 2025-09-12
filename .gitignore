@@ -1,1 +1,33 @@
-node_modules
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Compilación de TypeScript
+dist/
+*.tsbuildinfo
+
+# Archivos temporales
+tmp/
+*.tmp
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs y editores
+.vscode/
+.idea/
+
+# Entornos
+.env
+.env.local
+.env.*.local
+
+# MacOS
+.DS_Store
+
+# Otros
+package-lock.json
