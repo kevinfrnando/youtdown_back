@@ -7,10 +7,24 @@ import { randomUUID } from "crypto";
 import { YtDlpAdapter } from "../../infrastructure/downloader/YtDlpAdapter";
 import { LocalStorageAdapter } from "../../infrastructure/storage/LocalStorageAdapter";
 import { DownloadMedia } from "../../core/usecases/DownloadMedia";
+import cors from "cors";
 
 export function buildServer() {
   const app = express();
+
   app.use(express.json({ limit: "1mb" }));
+
+  const allowedOrigin =
+    process.env.NODE_ENV === "development"
+      ? env.DEV_CLIENT_URL
+      : env.PROD_CLIENT_URL;
+
+  app.use(
+    cors({
+      origin: allowedOrigin,
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    })
+  );
 
   app.use("/files", express.static(path.resolve(env.PUBLIC_DIR)));
 

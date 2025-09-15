@@ -8,7 +8,8 @@ yarn-error.log*
 dist/
 *.tsbuildinfo
 
-# Archivos temporales
+# Archivos temporales y publicos
+public/
 tmp/
 *.tmp
 *.log
