@@ -8,9 +8,11 @@ import { YtDlpAdapter } from "../../infrastructure/downloader/YtDlpAdapter";
 import { LocalStorageAdapter } from "../../infrastructure/storage/LocalStorageAdapter";
 import { DownloadMedia } from "../../core/usecases/DownloadMedia";
 import cors from "cors";
+import { FileLoggerAdapter } from "../../infrastructure/logger/FileLoggerAdapter";
 
 export function buildServer() {
   const app = express();
+  const logger = new FileLoggerAdapter();
 
   app.use(express.json({ limit: "1mb" }));
 
@@ -58,7 +60,7 @@ export function buildServer() {
   });
 
   app.post("/download", async (req, res) => {
-    console.log("POST /api/download body:", req.body);
+    logger.info(`POST /api/download body: ${JSON.stringify(req.body)}`);
     try {
       const { url, format, quality } = Body.parse(req.body);
       const id = randomUUID();
@@ -85,14 +87,14 @@ export function buildServer() {
         size: asset.sizeBytes,
         url: publicUrl,
       });
+      logger.info(`Download ended\n\n`);
     } catch (err: any) {
-      console.error("ERROR en /api/download:", err);
+      logger.error(`ERROR en /download: ${err}\n\n`);
       if (err?.issues) {
         return res
           .status(400)
           .json({ error: "Invalid request", details: err.issues });
       }
-      console.error(err);
       res.status(500).json({ error: "The file could not be downloaded" });
     }
   });

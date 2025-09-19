@@ -6,6 +6,7 @@ import type { MediaRequest } from "../../core/entities/MediaRequest.ts";
 import path from "node:path";
 import { MediaFormat, MediaQuality } from "../../core/entities/MediaRequest";
 import { spawn } from "node:child_process";
+import { FileLoggerAdapter } from "../logger/FileLoggerAdapter";
 
 export class YtDlpAdapter implements MediaDownloader {
   constructor(
@@ -14,6 +15,8 @@ export class YtDlpAdapter implements MediaDownloader {
     private ffmpegBin?: string
   ) {}
   async download(req: MediaRequest): Promise<MediaAsset> {
+    const logger = new FileLoggerAdapter();
+
     await fs.mkdir(this.workDir, { recursive: true });
 
     const prefix = `${req.id}-`;
@@ -53,7 +56,17 @@ export class YtDlpAdapter implements MediaDownloader {
     }
 
     await new Promise<void>((resolve, reject) => {
-      const proc = spawn(this.binPath, args, { stdio: "inherit" });
+      const proc = spawn(this.binPath, args, {
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+
+      proc.stdout?.on("data", (data: Buffer) => {
+        logger.info(data.toString().trim());
+      });
+
+      proc.stderr?.on("data", (data: Buffer) => {
+        logger.error(data.toString().trim());
+      });
       proc.on("error", reject);
       proc.on("exit", (code) =>
         code === 0 ? resolve() : reject(new Error(`yt-dlp exited ${code}`))
